@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>امتحان تحديد مستوى اللغة الإنجليزية مع لوحة الآدمن و Supabase</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js for statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.6); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-200">
+
+    <!-- Navbar Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetToHome()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-slate-900 dark:text-white leading-tight">اختبار تحديد المستوى</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">English CEFR Assessment Test</p>
+                </div>
+            </div>
+
+            <!-- Header Controls & Actions -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Admin Dashboard Button -->
+                <button onclick="openAdminModal()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-indigo-500/20 active:scale-95">
+                    <i class="fa-solid fa-user-shield text-sm text-indigo-200"></i>
+                    <span class="hidden sm:inline">لوحة الآدمن</span>
+                </button>
+
+                <!-- Supabase Connection Config Status -->
+                <button onclick="openSupabaseConfigModal()" id="supabaseStatusBadge" class="px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium transition flex items-center gap-1.5 hover:opacity-90">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="supabaseStatusText" class="hidden md:inline">إعدادات Supabase</span>
+                    <i class="fa-solid fa-database text-xs"></i>
+                </button>
+
+                <!-- SQL Schema Button -->
+                <button onclick="openSqlModal()" class="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium transition flex items-center gap-1.5 hover:opacity-90">
+                    <i class="fa-solid fa-code text-xs"></i>
+                    <span class="hidden md:inline">أوامر SQL Supabase</span>
+                </button>
+
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-center">
+
+        <!-- VIEW 1: Welcome / Registration View -->
+        <section id="welcomeView" class="block">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-100 dark:border-slate-700 text-center max-w-2xl mx-auto">
+                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl shadow-inner">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-3">مرحباً بك في اختبار تحديد المستوى باللغة الإنجليزية</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed mb-8">
+                    تم تصميم هذا الاختبار لتقييم مهاراتك من المستوى المبتدئ <span class="font-bold text-indigo-600 dark:text-indigo-400">(A1)</span> حتى المستوى المتقدم <span class="font-bold text-indigo-600 dark:text-indigo-400">(C1)</span> طبقاً للإطار الأوروبي المرجعي العام للغات (CEFR).
+                </p>
+
+                <!-- Exam Metrics Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-right">
+                    <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1"><i class="fa-regular fa-clock ml-1"></i>المدة</div>
+                        <div class="font-bold text-sm text-slate-800 dark:text-slate-200">20 دقيقة</div>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1"><i class="fa-solid fa-list-check ml-1"></i>الأسئلة</div>
+                        <div class="font-bold text-sm text-slate-800 dark:text-slate-200">25 سؤالاً</div>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1"><i class="fa-solid fa-font ml-1"></i>المهارات</div>
+                        <div class="font-bold text-sm text-slate-800 dark:text-slate-200">شامل المهارات</div>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1"><i class="fa-solid fa-cloud-arrow-up ml-1"></i>الحفظ</div>
+                        <div class="font-bold text-sm text-slate-800 dark:text-slate-200">تلقائي لـ Supabase</div>
+                    </div>
+                </div>
+
+                <!-- Student Registration Form -->
+                <form id="startForm" onsubmit="startTest(event)" class="space-y-4 text-right">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">الاسم الكامل *</label>
+                        <div class="relative">
+                            <input type="text" id="studentName" required placeholder="أدخل اسمك الكريم" class="w-full px-4 py-3 pl-10 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition">
+                            <i class="fa-regular fa-user absolute left-3 top-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">البريد الإلكتروني (اختياري لربطه بالنتيجة)</label>
+                        <div class="relative">
+                            <input type="email" id="studentEmail" placeholder="example@domain.com" class="w-full px-4 py-3 pl-10 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition">
+                            <i class="fa-regular fa-envelope absolute left-3 top-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base transition shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2">
+                        <span>ابدأ الاختبار الآن</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- VIEW 2: Interactive Exam Screen -->
+        <section id="examView" class="hidden">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 dark:border-slate-700">
+                
+                <!-- Exam Header Bar -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700 mb-6 gap-2">
+                    <div>
+                        <span id="categoryBadge" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300 mb-1">
+                            Grammar
+                        </span>
+                        <h3 class="text-xs text-slate-500 dark:text-slate-400">السؤال <span id="currentQNum">1</span> من <span id="totalQNum">25</span></h3>
+                    </div>
+
+                    <!-- Timer Badge -->
+                    <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-slate-700 dark:text-slate-200 font-mono font-bold text-sm">
+                        <i class="fa-regular fa-clock text-indigo-500"></i>
+                        <span id="timerText">20:00</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mb-8">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full w-0 transition-all duration-300"></div>
+                </div>
+
+                <!-- Listening Audio Player Prompt (for audio questions) -->
+                <div id="audioSection" class="hidden mb-6 p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 text-center">
+                    <p class="text-xs text-indigo-900 dark:text-indigo-200 font-bold mb-2">استمع للنص الصوتي قبل الإجابة:</p>
+                    <button id="playAudioBtn" onclick="playAudioPrompt()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 mx-auto shadow-md">
+                        <i class="fa-solid fa-volume-high"></i>
+                        <span id="audioBtnText">تشغيل الصوت</span>
+                    </button>
+                </div>
+
+                <!-- Reading Comprehension Text (for reading questions) -->
+                <div id="readingSection" class="hidden mb-6 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-200 dark:border-slate-600 text-sm leading-relaxed text-slate-800 dark:text-slate-200 font-serif" dir="ltr">
+                    <!-- Text inserted dynamically -->
+                </div>
+
+                <!-- Question Text -->
+                <div class="mb-6">
+                    <h2 id="questionText" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug" dir="ltr">
+                        Loading Question...
+                    </h2>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="optionsContainer" class="space-y-3 mb-8" dir="ltr">
+                    <!-- Options inserted dynamically -->
+                </div>
+
+                <!-- Exam Navigation Buttons -->
+                <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <button onclick="prevQuestion()" id="prevBtn" class="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-xs sm:text-sm transition disabled:opacity-40 disabled:cursor-not-allowed">
+                        السابق
+                    </button>
+
+                    <button onclick="nextQuestion()" id="nextBtn" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-indigo-500/20">
+                        التالي
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: Results & CEFR Certificate Screen -->
+        <section id="resultsView" class="hidden">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-100 dark:border-slate-700 text-center">
+                
+                <div class="inline-block p-4 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-4">
+                    <i class="fa-solid fa-circle-check text-3xl"></i>
+                </div>
+
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-1">تمت الإجابة بنجاح!</h2>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-6">تقرير النتيجة الرسمية لاختبار تحديد المستوى CEFR</p>
+
+                <!-- Main Level Badge Card -->
+                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-6 sm:p-8 rounded-3xl shadow-xl mb-8 relative overflow-hidden">
+                    <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="text-xs uppercase tracking-widest font-bold text-indigo-200 mb-2">مستواك المعتمد في اللغة الإنجليزية</div>
+                    <div id="resultCefrBadge" class="text-4xl sm:text-6xl font-black mb-2 tracking-tight">
+                        B2 - Upper Intermediate
+                    </div>
+                    <p id="resultCefrDesc" class="text-indigo-100 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
+                        تستطيع فهم الأفكار الرئيسية للنصوص المعقدة والتفاعل بعفوية مع المتحدثين الأصليين.
+                    </p>
+                    <div class="mt-6 inline-flex items-center gap-4 bg-white/10 backdrop-blur-md px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-bold border border-white/20">
+                        <span>الدرجة الكلية: <strong id="resultScoreText">18/25</strong></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-300"></span>
+                        <span>النسبة المئوية: <strong id="resultPercentText">72%</strong></span>
+                    </div>
+                </div>
+
+                <!-- Skills Breakdown Chart and Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-right">
+                    <!-- Chart -->
+                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 sm:p-6 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center">
+                        <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-4 w-full text-right">تحليل المهارات بالأداء:</h4>
+                        <div class="w-full max-w-[260px] h-[220px]">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation Card -->
+                    <div class="bg-slate-50 dark:bg-slate-700/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-lightbulb text-amber-500 ml-1"></i>التوصيات الأكاديمية لمستواك:</h4>
+                            <p id="recommendationText" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                يُنصح بالتركيز على تحسين مفردات المصطلحات التخصصية وممارسة المحادثة مع متحدثين أصليين لتطوير مهارة الطلاقة.
+                            </p>
+                        </div>
+                        <div id="saveStatusNote" class="text-xs p-3 rounded-xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center gap-2 border border-emerald-200 dark:border-emerald-800">
+                            <i class="fa-solid fa-cloud-check text-emerald-500"></i>
+                            <span>تم حفظ نتيجتك بنجاح في قاعدة البيانات (Supabase).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Action Buttons -->
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-md">
+                        <i class="fa-solid fa-print"></i>
+                        <span>طباعة التقرير / PDF</span>
+                    </button>
+                    <button onclick="resetToHome()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-md">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>إعادة الاختبار</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: Admin Dashboard Screen -->
+        <section id="adminView" class="hidden">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 dark:border-slate-700">
+                
+                <!-- Admin Header Bar -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-700 mb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">
+                                <i class="fa-solid fa-user-shield text-lg"></i>
+                            </span>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">لوحة تحكم المسؤول (Admin Dashboard)</h2>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">عرض جميع نتائج الطلاب واختبارات تحديد المستوى المسجلة</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="fetchAdminData()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 text-xs font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>تحديث</span>
+                        </button>
+                        <button onclick="exportToCSV()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>تصدير Excel</span>
+                        </button>
+                        <button onclick="closeAdminDashboard()" class="px-3.5 py-2 rounded-xl bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 hover:bg-rose-200 text-xs font-bold transition">
+                            خروج
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Analytics Cards Summary -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">إجمالي المتقدمين</div>
+                        <div id="adminStatTotal" class="text-2xl font-black text-indigo-600 dark:text-indigo-400">0</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">متوسط النسبة</div>
+                        <div id="adminStatAvg" class="text-2xl font-black text-emerald-600 dark:text-emerald-400">0%</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">أعلى مستوى شائع</div>
+                        <div id="adminStatTopLevel" class="text-2xl font-black text-amber-500">-</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">مصدر البيانات الحالي</div>
+                        <div id="adminStatSource" class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-2">Supabase DB</div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6">
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="adminSearchInput" oninput="filterAdminResults()" placeholder="البحث باسم الطالب أو البريد..." class="w-full px-3.5 py-2 pl-9 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="adminLevelFilter" onchange="filterAdminResults()" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-xs text-slate-900 dark:text-white outline-none">
+                            <option value="ALL">جميع المستويات</option>
+                            <option value="A1">A1 - Beginner</option>
+                            <option value="A2">A2 - Elementary</option>
+                            <option value="B1">B1 - Intermediate</option>
+                            <option value="B2">B2 - Upper Intermediate</option>
+                            <option value="C1">C1 - Advanced</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submissions Table -->
+                <div class="overflow-x-auto custom-scrollbar rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <table class="w-full text-right text-xs text-slate-700 dark:text-slate-300">
+                        <thead class="bg-slate-100 dark:bg-slate-700/70 text-slate-900 dark:text-white font-bold uppercase border-b border-slate-200 dark:border-slate-700">
+                            <tr>
+                                <th class="p-3.5">الطالب</th>
+                                <th class="p-3.5">المستوى</th>
+                                <th class="p-3.5">الدرجة</th>
+                                <th class="p-3.5">النسبة</th>
+                                <th class="p-3.5">تفاصيل المهارات</th>
+                                <th class="p-3.5">التاريخ</th>
+                                <th class="p-3.5 text-center">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-700 text-right animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400 flex items-center justify-center">
+                        <i class="fa-solid fa-lock text-sm"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base">تسجيل دخول المسؤول (Admin)</h3>
+                </div>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="loginErrorMsg" class="hidden mb-4 p-3 bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-xl text-xs flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>اسم المستخدم أو كلمة المرور غير صحيحة!</span>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم المستخدم</label>
+                    <input type="text" id="adminUser" required placeholder="admintest" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">كلمة المرور</label>
+                    <input type="password" id="adminPass" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 text-[11px] text-indigo-900 dark:text-indigo-300">
+                    <strong>بيانات الدخول المطلوبة:</strong><br>
+                    • اسم الآدمن: <code class="font-mono font-bold">admintest</code><br>
+                    • الكلمة: <code class="font-mono font-bold">123456789</code>
+                </div>
+
+                <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition shadow-md shadow-indigo-500/20">
+                    تسجيل الدخول للوحة التحكم
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Supabase Credentials Config Modal -->
+    <div id="supabaseConfigModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 dark:border-slate-700 text-right">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-database text-indigo-500"></i>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base">ربط قاعدة البيانات (Supabase API Key)</h3>
+                </div>
+                <button onclick="closeSupabaseConfigModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                أدخل رابط المشروع و المفتاح العام (Anon Key) الخاص بك في Supabase لحفظ وقراءة النتائج مباشرة من إعدادات مشروعك:
+            </p>
+
+            <form onsubmit="saveSupabaseConfig(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Project URL</label>
+                    <input type="url" id="cfgSupaUrl" placeholder="https://xyzcompany.supabase.co" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-mono" dir="ltr">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Anon API Key</label>
+                    <input type="text" id="cfgSupaKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-mono" dir="ltr">
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" onclick="useLocalStorageOnly()" class="text-xs text-amber-600 dark:text-amber-400 underline hover:opacity-80">
+                        الاعتماد على التخزين المحلي فقط (Offline Mode)
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
+                        حفظ العناوين والربط
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: SQL Schema Commands Modal -->
+    <div id="sqlModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl border border-slate-100 dark:border-slate-700 text-right flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-code text-emerald-500"></i>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base">سكربت Supabase SQL Editor</h3>
+                </div>
+                <button onclick="closeSqlModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 mb-2">
+                قم بنسخ السكربت التالي ولصقه في **Supabase SQL Editor** لإنشاء الجدول وإعداد الصلاحيات والأدوار بنجاح:
+            </p>
+
+            <div class="relative my-2 flex-grow overflow-hidden flex flex-col">
+                <div class="flex justify-between items-center bg-slate-800 px-4 py-2 rounded-t-xl text-xs text-slate-400 font-mono">
+                    <span>schema.sql</span>
+                    <button onclick="copySqlScript()" id="copyBtn" class="text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>نسخ الكود</span>
+                    </button>
+                </div>
+                <pre class="bg-slate-950 text-slate-200 p-4 rounded-b-xl overflow-y-auto text-xs font-mono leading-relaxed flex-grow border border-slate-800" dir="ltr"><code id="sqlCodeBlock">-- =========================================================
+-- Supabase Schema for English Placement Test Application
+-- Copy and paste this directly into your Supabase SQL Editor
+-- =========================================================
+
+-- 1. Create table for storing test submissions
+CREATE TABLE IF NOT EXISTS public.test_results (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    student_name TEXT NOT NULL,
+    student_email TEXT,
+    cefr_level TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    total_questions INTEGER NOT NULL DEFAULT 25,
+    percentage NUMERIC(5, 2) NOT NULL,
+    grammar_score INTEGER DEFAULT 0,
+    vocab_score INTEGER DEFAULT 0,
+    reading_score INTEGER DEFAULT 0,
+    listening_score INTEGER DEFAULT 0,
+    time_spent_seconds INTEGER DEFAULT 0,
+    category_breakdown JSONB
+);
+
+-- 2. Enable Row Level Security (RLS)
+ALTER TABLE public.test_results ENABLE ROW LEVEL SECURITY;
+
+-- 3. Drop existing policies if any
+DROP POLICY IF EXISTS "Allow public insert to test_results" ON public.test_results;
+DROP POLICY IF EXISTS "Allow public read access to test_results" ON public.test_results;
+DROP POLICY IF EXISTS "Allow public delete from test_results" ON public.test_results;
+DROP POLICY IF EXISTS "Allow public update to test_results" ON public.test_results;
+
+-- 4. Create Security Policies for Full Access
+CREATE POLICY "Allow public insert to test_results"
+    ON public.test_results
+    FOR INSERT 
+    WITH CHECK (true);
+
+CREATE POLICY "Allow public read access to test_results"
+    ON public.test_results
+    FOR SELECT 
+    USING (true);
+
+CREATE POLICY "Allow public delete from test_results"
+    ON public.test_results
+    FOR DELETE 
+    USING (true);
+
+CREATE POLICY "Allow public update to test_results"
+    ON public.test_results
+    FOR UPDATE 
+    USING (true)
+    WITH CHECK (true);
+
+-- 5. Create performance indexes
+CREATE INDEX IF NOT EXISTS idx_test_results_created ON public.test_results (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_test_results_cefr ON public.test_results (cefr_level);
+CREATE INDEX IF NOT EXISTS idx_test_results_email ON public.test_results (student_email);</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. Exam Questions Data (CEFR A1-C1)
+        // ==========================================
+        const questionsData = [
+            // A1 Level (Questions 1-5)
+            {
+                id: 1,
+                level: "A1",
+                category: "Grammar",
+                question: "She _____ a doctor at the local city hospital.",
+                options: ["is", "are", "be", "am"],
+                answer: 0
+            },
+            {
+                id: 2,
+                level: "A1",
+                category: "Vocabulary",
+                question: "Which word means the opposite of 'Cold'?",
+                options: ["Big", "Hot", "Dark", "Tall"],
+                answer: 1
+            },
+            {
+                id: 3,
+                level: "A1",
+                category: "Grammar",
+                question: "They _____ play football on Sunday mornings.",
+                options: ["doesn't", "don't", "isn't", "not"],
+                answer: 1
+            },
+            {
+                id: 4,
+                level: "A1",
+                category: "Listening",
+                audioText: "Welcome to our class. Please open your books to page ten.",
+                question: "Where should the students open their books?",
+                options: ["Page 20", "Page 10", "Page 2", "Page 12"],
+                answer: 1
+            },
+            {
+                id: 5,
+                level: "A1",
+                category: "Vocabulary",
+                question: "I want to buy some bread from the _____.",
+                options: ["pharmacy", "bakery", "library", "airport"],
+                answer: 1
+            },
+
+            // A2 Level (Questions 6-10)
+            {
+                id: 6,
+                level: "A2",
+                category: "Grammar",
+                question: "Yesterday, we _____ a very exciting movie at the cinema.",
+                options: ["watch", "watched", "have watched", "watching"],
+                answer: 1
+            },
+            {
+                id: 7,
+                level: "A2",
+                category: "Reading",
+                readingText: "Sarah loves cooking. Last weekend, she prepared a traditional Italian pasta dinner for her family. Everyone enjoyed the fresh ingredients.",
+                question: "What did Sarah cook for her family last weekend?",
+                options: ["French pastries", "Italian pasta", "Mexican tacos", "Japanese sushi"],
+                answer: 1
+            },
+            {
+                id: 8,
+                level: "A2",
+                category: "Grammar",
+                question: "This laptop is _____ than the one I bought last year.",
+                options: ["more cheap", "cheaper", "cheapest", "as cheap"],
+                answer: 1
+            },
+            {
+                id: 9,
+                level: "A2",
+                category: "Vocabulary",
+                question: "Could you please _____ the light? It is very dark in here.",
+                options: ["turn on", "turn off", "get off", "look after"],
+                answer: 0
+            },
+            {
+                id: 10,
+                level: "A2",
+                category: "Listening",
+                audioText: "The train to London departs from platform four in five minutes.",
+                question: "Which platform does the train leave from?",
+                options: ["Platform 14", "Platform 4", "Platform 5", "Platform 40"],
+                answer: 1
+            },
+
+            // B1 Level (Questions 11-15)
+            {
+                id: 11,
+                level: "B1",
+                category: "Grammar",
+                question: "If I _____ enough money, I would travel around the world.",
+                options: ["have", "had", "would have", "will have"],
+                answer: 1
+            },
+            {
+                id: 12,
+                level: "B1",
+                category: "Grammar",
+                question: "He has been living in Dubai _____ three years.",
+                options: ["since", "for", "during", "from"],
+                answer: 1
+            },
+            {
+                id: 13,
+                level: "B1",
+                category: "Vocabulary",
+                question: "She decided to _____ her application because she found another job.",
+                options: ["withdraw", "postpone", "overcome", "accomplish"],
+                answer: 0
+            },
+            {
+                id: 14,
+                level: "B1",
+                category: "Reading",
+                readingText: "Remote work has become increasingly popular. While it provides flexibility and reduces commuting times, it can also lead to feelings of isolation among team members.",
+                question: "What is mentioned as a potential disadvantage of remote work?",
+                options: ["Longer commute times", "Feelings of isolation", "Lack of flexibility", "Lower productivity"],
+                answer: 1
+            },
+            {
+                id: 15,
+                level: "B1",
+                category: "Listening",
+                audioText: "Please note that the conference schedule has changed. The keynote speech will start at two PM instead of three PM.",
+                question: "What time will the keynote speech start?",
+                options: ["1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"],
+                answer: 1
+            },
+
+            // B2 Level (Questions 16-20)
+            {
+                id: 16,
+                level: "B2",
+                category: "Grammar",
+                question: "By the time we arrived at the venue, the concert _____ already.",
+                options: ["started", "has started", "had started", "was starting"],
+                answer: 2
+            },
+            {
+                id: 17,
+                level: "B2",
+                category: "Vocabulary",
+                question: "His arguments were so _____ that everyone voted in favor of the proposal.",
+                options: ["persuasive", "ambiguous", "superficial", "reluctant"],
+                answer: 0
+            },
+            {
+                id: 18,
+                level: "B2",
+                category: "Grammar",
+                question: "Hardly _____ entered the room when the lights went out.",
+                options: ["I had", "had I", "did I", "have I"],
+                answer: 1
+            },
+            {
+                id: 19,
+                level: "B2",
+                category: "Reading",
+                readingText: "Artificial intelligence is reshaping urban development. Smart traffic management systems now analyze real-time data to optimize signal timings, significantly alleviating congestion during rush hours.",
+                question: "How do smart traffic management systems reduce congestion?",
+                options: ["By building new highway lanes", "By adjusting traffic light timings dynamically", "By prohibiting personal vehicles", "By raising fuel prices"],
+                answer: 1
+            },
+            {
+                id: 20,
+                level: "B2",
+                category: "Listening",
+                audioText: "Despite initial technical glitches, the product launch generated unprecedented revenue across global markets.",
+                question: "How was the financial outcome of the product launch?",
+                options: ["It resulted in major losses", "It generated unprecedented revenue", "It met modest expectations", "It failed completely"],
+                answer: 1
+            },
+
+            // C1 Level (Questions 21-25)
+            {
+                id: 21,
+                level: "C1",
+                category: "Grammar",
+                question: "Were the manager _____ the budget sooner, the project would not have been delayed.",
+                options: ["to approve", "approved", "to have approved", "approving"],
+                answer: 2
+            },
+            {
+                id: 22,
+                level: "C1",
+                category: "Vocabulary",
+                question: "The CEO gave an _____ speech that captivated the entire audience.",
+                options: ["eloquent", "obsolete", "inadvertent", "erroneous"],
+                answer: 0
+            },
+            {
+                id: 23,
+                level: "C1",
+                category: "Vocabulary",
+                question: "The findings of the research paper were _____ with existing scientific theories.",
+                options: ["incompatible", "quintessential", "indispensable", "unanimous"],
+                answer: 0
+            },
+            {
+                id: 24,
+                level: "C1",
+                category: "Grammar",
+                question: "Not until the investigation concluded _____ disclose the confidential documents.",
+                options: ["the authority did", "did the authority", "the authority had", "will the authority"],
+                answer: 1
+            },
+            {
+                id: 25,
+                level: "C1",
+                category: "Reading",
+                readingText: "The phenomenon of cognitive dissonance occurs when an individual holds contradictory beliefs simultaneously. To alleviate the resulting psychological discomfort, people often rationalise their behavior or disregard disconfirming evidence.",
+                question: "According to the text, how do individuals typically resolve cognitive dissonance?",
+                options: ["By seeking external therapy", "By rationalizing or ignoring contradictory evidence", "By changing their habits instantly", "By avoiding social interaction"],
+                answer: 1
+            }
+        ];
+
+        // State variables
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(questionsData.length).fill(null);
+        let studentData = { name: '', email: '' };
+        let timerInterval = null;
+        let timeSpentSeconds = 0;
+        let supabaseClient = null;
+        let adminResultsCache = [];
+        let chartInstance = null;
+
+        // Credentials
+        const ADMIN_USER = "admintest";
+        const ADMIN_PASS = "123456789";
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            initSupabaseFromStorage();
+        });
+
+        // Supabase Initialization
+        function initSupabaseFromStorage() {
+            const savedUrl = localStorage.getItem('supabase_url');
+            const savedKey = localStorage.getItem('supabase_key');
+
+            const badgeText = document.getElementById('supabaseStatusText');
+            const badge = document.getElementById('supabaseStatusBadge');
+
+            if (savedUrl && savedKey && window.supabase) {
+                try {
+                    supabaseClient = window.supabase.createClient(savedUrl, savedKey);
+                    badgeText.textContent = "متصل بـ Supabase";
+                    badge.className = "px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium transition flex items-center gap-1.5";
+                } catch (e) {
+                    console.error("Supabase init error:", e);
+                    setLocalStorageStatus();
+                }
+            } else {
+                setLocalStorageStatus();
+            }
+        }
+
+        function setLocalStorageStatus() {
+            supabaseClient = null;
+            const badgeText = document.getElementById('supabaseStatusText');
+            const badge = document.getElementById('supabaseStatusBadge');
+            badgeText.textContent = "التخزين المحلي (Offline)";
+            badge.className = "px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium transition flex items-center gap-1.5";
+        }
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // Start Test
+        function startTest(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const email = document.getElementById('studentEmail').value.trim();
+
+            if (!name) return;
+
+            studentData = { name, email };
+            currentQuestionIndex = 0;
+            userAnswers = new Array(questionsData.length).fill(null);
+            timeSpentSeconds = 0;
+
+            switchView('examView');
+            renderQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let duration = 20 * 60; // 20 minutes
+            const timerDisplay = document.getElementById('timerText');
+
+            timerInterval = setInterval(() => {
+                timeSpentSeconds++;
+                let remaining = duration - timeSpentSeconds;
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest();
+                    return;
+                }
+                let mins = Math.floor(remaining / 60);
+                let secs = remaining % 60;
+                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Render Current Question
+        function renderQuestion() {
+            const q = questionsData[currentQuestionIndex];
+
+            document.getElementById('currentQNum').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQNum').textContent = questionsData.length;
+            document.getElementById('categoryBadge').textContent = `${q.level} • ${q.category}`;
+            document.getElementById('questionText').textContent = q.question;
+
+            // Update Progress Bar
+            const progress = ((currentQuestionIndex + 1) / questionsData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            // Handle Audio Prompt
+            const audioSec = document.getElementById('audioSection');
+            if (q.category === 'Listening' && q.audioText) {
+                audioSec.classList.remove('hidden');
+            } else {
+                audioSec.classList.add('hidden');
+            }
+
+            // Handle Reading Section
+            const readingSec = document.getElementById('readingSection');
+            if (q.category === 'Reading' && q.readingText) {
+                readingSec.textContent = q.readingText;
+                readingSec.classList.remove('hidden');
+            } else {
+                readingSec.classList.add('hidden');
+            }
+
+            // Render Options
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const isSelected = userAnswers[currentQuestionIndex] === idx;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => selectOption(idx);
+                btn.className = `w-full text-left p-4 rounded-xl border font-medium text-sm transition flex items-center justify-between ${
+                    isSelected 
+                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-900 dark:text-indigo-200 shadow-sm' 
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`;
+
+                btn.innerHTML = `
+                    <span class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold ${
+                            isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 dark:border-slate-500 text-slate-500'
+                        }">${String.fromCharCode(65 + idx)}</span>
+                        <span>${opt}</span>
+                    </span>
+                    ${isSelected ? '<i class="fa-solid fa-circle-check text-indigo-600 dark:text-indigo-400 text-lg"></i>' : ''}
+                `;
+                container.appendChild(btn);
+            });
+
+            // Navigation Buttons
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestionIndex === questionsData.length - 1) {
+                nextBtn.textContent = 'إنهاء الاختبار وقدم النتيجة';
+                nextBtn.className = 'px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition shadow-md';
+            } else {
+                nextBtn.textContent = 'التالي';
+                nextBtn.className = 'px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm transition shadow-md';
+            }
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestionIndex] = index;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questionsData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                finishTest();
+            }
+        }
+
+        // Speech Synthesis for Listening Questions
+        function playAudioPrompt() {
+            const q = questionsData[currentQuestionIndex];
+            if (!q.audioText) return;
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(q.audioText);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+
+            const btnText = document.getElementById('audioBtnText');
+            btnText.textContent = "جاري التشغيل...";
+
+            utterance.onend = () => { btnText.textContent = "إعادة التشغيل"; };
+            utterance.onerror = () => { btnText.textContent = "إعادة التشغيل"; };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Finish & Calculate Results
+        async function finishTest() {
+            clearInterval(timerInterval);
+
+            let score = 0;
+            let breakdown = { Grammar: { correct: 0, total: 0 }, Vocabulary: { correct: 0, total: 0 }, Reading: { correct: 0, total: 0 }, Listening: { correct: 0, total: 0 } };
+
+            questionsData.forEach((q, idx) => {
+                if (!breakdown[q.category]) breakdown[q.category] = { correct: 0, total: 0 };
+                breakdown[q.category].total++;
+
+                if (userAnswers[idx] === q.answer) {
+                    score++;
+                    breakdown[q.category].correct++;
+                }
+            });
+
+            const percentage = Math.round((score / questionsData.length) * 100);
+            const cefr = calculateCEFRLevel(score, percentage);
+
+            // Render Results Screen
+            document.getElementById('resultCefrBadge').textContent = `${cefr.level} - ${cefr.title}`;
+            document.getElementById('resultCefrDesc').textContent = cefr.description;
+            document.getElementById('resultScoreText').textContent = `${score}/${questionsData.length}`;
+            document.getElementById('resultPercentText').textContent = `${percentage}%`;
+            document.getElementById('recommendationText').textContent = cefr.recommendation;
+
+            renderSkillsChart(breakdown);
+            switchView('resultsView');
+
+            // Save Result to Supabase or Local Storage
+            const record = {
+                student_name: studentData.name,
+                student_email: studentData.email || null,
+                cefr_level: `${cefr.level} - ${cefr.title}`,
+                score: score,
+                total_questions: questionsData.length,
+                percentage: percentage,
+                grammar_score: breakdown.Grammar?.correct || 0,
+                vocab_score: breakdown.Vocabulary?.correct || 0,
+                reading_score: breakdown.Reading?.correct || 0,
+                listening_score: breakdown.Listening?.correct || 0,
+                time_spent_seconds: timeSpentSeconds,
+                category_breakdown: breakdown,
+                created_at: new Date().toISOString()
+            };
+
+            await saveTestResult(record);
+        }
+
+        function calculateCEFRLevel(score, percentage) {
+            if (percentage >= 88) {
+                return {
+                    level: "C1",
+                    title: "Advanced",
+                    description: "تستطيع فهم طيف واسع من النصوص الطويلة والمعقدة، والتعبير بعفوية وطلاقة دون الحاجة للبحث عن الكلمات.",
+                    recommendation: "تركز توصياتك على القراءة في المجلات الأكاديمية وصياغة مقالات متقدمة وتطوير الدقة اللغوية بالمحادثات الاحترافية."
+                };
+            } else if (percentage >= 72) {
+                return {
+                    level: "B2",
+                    title: "Upper Intermediate",
+                    description: "تستطيع فهم الأفكار الرئيسية للنصوص المعقدة والتفاعل بعفوية سلسة مع الناطقين بها.",
+                    recommendation: "يُنصح بزيادة حصيلتك من المصطلحات التخصصية والأفعال المركبة (Phrasal Verbs) وممارسة كتابة التقارير الرسمية."
+                };
+            } else if (percentage >= 52) {
+                return {
+                    level: "B1",
+                    title: "Intermediate",
+                    description: "تستطيع التعامل مع معظم المواقف اليومية واستيعاب النقاط الرئيسية في المواضيع الفكرية والعملية.",
+                    recommendation: "استمر في مشاهدة البرامج بدون ترجمة وتدرب على الأفكار المركبة وقواعد الأزمنة التامة."
+                };
+            } else if (percentage >= 32) {
+                return {
+                    level: "A2",
+                    title: "Elementary",
+                    description: "تستطيع فهم الجمل والتعابير المباشرة المتعلقة بالمجالات ذات الأهمية المباشرة (العائلة، التسوق، العمل).",
+                    recommendation: "قم بزيادة حصيلة المفردات اليومية ومراجعة قواعد الماضي البسيط والمستقبل."
+                };
+            } else {
+                return {
+                    level: "A1",
+                    title: "Beginner",
+                    description: "تستطيع فهم واستخدام التعابير اليومية البسيطة والعبارات الأساسية للغاية لتلبية الاحتياجات الأولية.",
+                    recommendation: "ابدأ بدراسة الأساسيات وقواعد الحاضر البسيط والمفردات التعريفية الأساسية."
+                };
+            }
+        }
+
+        // Render Skills Chart
+        function renderSkillsChart(breakdown) {
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            const categories = Object.keys(breakdown);
+            const percentages = categories.map(cat => {
+                const b = breakdown[cat];
+                return b.total > 0 ? Math.round((b.correct / b.total) * 100) : 0;
+            });
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['القواعد', 'المفردات', 'القراءة', 'الاستماع'],
+                    datasets: [{
+                        label: 'نسبة الإتقان %',
+                        data: percentages,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Save Result to Supabase or LocalStorage
+        async function saveTestResult(record) {
+            const saveNote = document.getElementById('saveStatusNote');
+
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('test_results')
+                        .insert([record]);
+
+                    if (error) throw error;
+
+                    saveNote.innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-500"></i><span>تم حفظ نتيجتك بنجاح في قاعدة بيانات Supabase.</span>';
+                    saveNote.className = "text-xs p-3 rounded-xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center gap-2 border border-emerald-200 dark:border-emerald-800";
+                } catch (err) {
+                    console.warn("Supabase Save Error, falling back to LocalStorage:", err);
+                    saveToLocalStorage(record);
+                    saveNote.innerHTML = '<i class="fa-solid fa-circle-info text-amber-500"></i><span>تم حفظ النتيجة محلياً (تعذر الاتصال بـ Supabase).</span>';
+                }
+            } else {
+                saveToLocalStorage(record);
+                saveNote.innerHTML = '<i class="fa-solid fa-hard-drive text-slate-500"></i><span>تم حفظ نتيجتك في التخزين المحلي للجهاز.</span>';
+            }
+        }
+
+        function saveToLocalStorage(record) {
+            let existing = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
+            existing.unshift({ ...record, id: crypto.randomUUID() });
+            localStorage.setItem('placement_test_results', JSON.stringify(existing));
+        }
+
+        // ==========================================
+        // Admin Dashboard Logic
+        // ==========================================
+        function openAdminModal() {
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+            document.getElementById('loginErrorMsg').classList.add('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value.trim();
+
+            if (u === ADMIN_USER && p === ADMIN_PASS) {
+                closeAdminModal();
+                switchView('adminView');
+                fetchAdminData();
+            } else {
+                document.getElementById('loginErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminDashboard() {
+            resetToHome();
+        }
+
+        async function fetchAdminData() {
+            const tableBody = document.getElementById('adminTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">جاري تحميل البيانات...</td></tr>';
+
+            let records = [];
+            let isSupabase = false;
+
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('test_results')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (error) throw error;
+                    records = data || [];
+                    isSupabase = true;
+                } catch (e) {
+                    console.warn("Could not load from Supabase, loading local storage:", e);
+                    records = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
+                }
+            } else {
+                records = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
+            }
+
+            adminResultsCache = records;
+            document.getElementById('adminStatSource').textContent = isSupabase ? "Supabase DB" : "التخزين المحلي";
+            renderAdminTable(records);
+            updateAdminStats(records);
+        }
+
+        function updateAdminStats(records) {
+            document.getElementById('adminStatTotal').textContent = records.length;
+
+            if (records.length === 0) {
+                document.getElementById('adminStatAvg').textContent = '0%';
+                document.getElementById('adminStatTopLevel').textContent = '-';
+                return;
+            }
+
+            const avg = Math.round(records.reduce((acc, r) => acc + (r.percentage || 0), 0) / records.length);
+            document.getElementById('adminStatAvg').textContent = `${avg}%`;
+
+            // Most frequent level
+            const levelCounts = {};
+            records.forEach(r => {
+                const code = (r.cefr_level || 'A1').substring(0, 2);
+                levelCounts[code] = (levelCounts[code] || 0) + 1;
+            });
+            let topLvl = Object.keys(levelCounts).reduce((a, b) => levelCounts[a] > levelCounts[b] ? a : b, '-');
+            document.getElementById('adminStatTopLevel').textContent = topLvl;
+        }
+
+        function renderAdminTable(records) {
+            const tableBody = document.getElementById('adminTableBody');
+            tableBody.innerHTML = '';
+
+            if (records.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">لا توجد نتائج مسجلة حتى الآن</td></tr>';
+                return;
+            }
+
+            records.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/30 transition";
+
+                const dateStr = new Date(r.created_at).toLocaleDateString('ar-EG', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                const cefrCode = (r.cefr_level || '').substring(0, 2);
+                let badgeColor = "bg-slate-100 text-slate-700";
+                if (cefrCode === 'C1') badgeColor = "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300";
+                if (cefrCode === 'B2') badgeColor = "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300";
+                if (cefrCode === 'B1') badgeColor = "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300";
+                if (cefrCode === 'A2') badgeColor = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300";
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold">
+                        <div>${escapeHtml(r.student_name)}</div>
+                        <div class="text-[10px] font-normal text-slate-400" dir="ltr">${escapeHtml(r.student_email || 'بدون بريد')}</div>
+                    </td>
+                    <td class="p-3.5">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeColor}">
+                            ${escapeHtml(r.cefr_level || 'A1')}
+                        </span>
+                    </td>
+                    <td class="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">${r.score}/25</td>
+                    <td class="p-3.5 font-bold">${r.percentage}%</td>
+                    <td class="p-3.5 text-[11px] text-slate-500 dark:text-slate-400">
+                        قواعد: ${r.grammar_score || 0} | مفردات: ${r.vocab_score || 0} | قراءة: ${r.reading_score || 0} | استماع: ${r.listening_score || 0}
+                    </td>
+                    <td class="p-3.5 text-[11px] text-slate-400">${dateStr}</td>
+                    <td class="p-3.5 text-center">
+                        <button onclick="deleteRecord('${r.id}')" class="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function filterAdminResults() {
+            const query = document.getElementById('adminSearchInput').value.toLowerCase();
+            const level = document.getElementById('adminLevelFilter').value;
+
+            const filtered = adminResultsCache.filter(r => {
+                const matchesQuery = (r.student_name || '').toLowerCase().includes(query) || (r.student_email || '').toLowerCase().includes(query);
+                const matchesLevel = level === 'ALL' || (r.cefr_level || '').startsWith(level);
+                return matchesQuery && matchesLevel;
+            });
+
+            renderAdminTable(filtered);
+        }
+
+        async function deleteRecord(id) {
+            if (!id) return;
+
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('test_results').delete().eq('id', id);
+                } catch (e) {
+                    console.error("Supabase Delete Error:", e);
+                }
+            }
+
+            // Delete from local cache
+            let local = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
+            local = local.filter(x => x.id !== id);
+            localStorage.setItem('placement_test_results', JSON.stringify(local));
+
+            fetchAdminData();
+        }
+
+        function exportToCSV() {
+            if (adminResultsCache.length === 0) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "الاسم,البريد,المستوى,الدرجة,النسبة,القواعد,المفردات,القراءة,الاستماع,التاريخ\n";
+
+            adminResultsCache.forEach(r => {
+                csvContent += `"${r.student_name}","${r.student_email || ''}","${r.cefr_level}",${r.score},${r.percentage}%,${r.grammar_score},${r.vocab_score},${r.reading_score},${r.listening_score},"${r.created_at}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `English_Placement_Test_Results_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Modal triggers
+        function openSupabaseConfigModal() {
+            document.getElementById('cfgSupaUrl').value = localStorage.getItem('supabase_url') || '';
+            document.getElementById('cfgSupaKey').value = localStorage.getItem('supabase_key') || '';
+            document.getElementById('supabaseConfigModal').classList.remove('hidden');
+        }
+
+        function closeSupabaseConfigModal() {
+            document.getElementById('supabaseConfigModal').classList.add('hidden');
+        }
+
+        function saveSupabaseConfig(e) {
+            e.preventDefault();
+            const url = document.getElementById('cfgSupaUrl').value.trim();
+            const key = document.getElementById('cfgSupaKey').value.trim();
+
+            if (url && key) {
+                localStorage.setItem('supabase_url', url);
+                localStorage.setItem('supabase_key', key);
+            }
+            closeSupabaseConfigModal();
+            initSupabaseFromStorage();
+        }
+
+        function useLocalStorageOnly() {
+            localStorage.removeItem('supabase_url');
+            localStorage.removeItem('supabase_key');
+            closeSupabaseConfigModal();
+            setLocalStorageStatus();
+        }
+
+        function openSqlModal() {
+            document.getElementById('sqlModal').classList.remove('hidden');
+        }
+
+        function closeSqlModal() {
+            document.getElementById('sqlModal').classList.add('hidden');
+        }
+
+        function copySqlScript() {
+            const text = document.getElementById('sqlCodeBlock').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i><span>تم النسخ!</span>';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-regular fa-copy"></i><span>نسخ الكود</span>';
+                }, 2000);
+            });
+        }
+
+        // View Router Helper
+        function switchView(viewId) {
+            ['welcomeView', 'examView', 'resultsView', 'adminView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (id === viewId) {
+                    el.classList.remove('hidden');
+                    el.classList.add('block');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('block');
+                }
+            });
+        }
+
+        function resetToHome() {
+            clearInterval(timerInterval);
+            switchView('welcomeView');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
