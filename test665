@@ -51,7 +51,6 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-200">
 
-    <!-- Navbar Header -->
     <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             
@@ -411,8 +410,8 @@
 
                 <div class="p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 text-[11px] text-indigo-900 dark:text-indigo-300">
                     <strong>بيانات الدخول المطلوبة:</strong><br>
-                    • اسم الآدمن: <code class="font-mono font-bold">admintest</code><br>
-                    • الكلمة: <code class="font-mono font-bold">123456789</code>
+                    • الآدمن 1: <code class="font-mono font-bold">admintest</code> / <code class="font-mono font-bold">123456789</code><br>
+                    • الآدمن 2: <code class="font-mono font-bold">test 6565</code> / <code class="font-mono font-bold">123456</code>
                 </div>
 
                 <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition shadow-md shadow-indigo-500/20">
@@ -436,7 +435,7 @@
             </div>
 
             <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                أدخل رابط المشروع و المفتاح العام (Anon Key) الخاص بك في Supabase لحفظ وقراءة النتائج مباشرة من إعدادات مشروعك:
+                أدخل رابط المشروع والمفتاح العام (Anon Key) الخاص بك في Supabase لحفظ وقراءة النتائج مباشرة من إعدادات مشروعك:
             </p>
 
             <form onsubmit="saveSupabaseConfig(event)" class="space-y-4">
@@ -454,868 +453,322 @@
                         الاعتماد على التخزين المحلي فقط (Offline Mode)
                     </button>
                     <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
-                        حفظ العناوين والربط
+                        حفظ واتصال
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 3: SQL Schema Commands Modal -->
+    <!-- MODAL 3: SQL Schema Guide Modal -->
     <div id="sqlModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl border border-slate-100 dark:border-slate-700 text-right flex flex-col max-h-[90vh]">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-100 dark:border-slate-700 text-right">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-700">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-code text-emerald-500"></i>
-                    <h3 class="font-bold text-slate-900 dark:text-white text-base">سكربت Supabase SQL Editor</h3>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base">تعليمات وأوامر SQL لإنشاء الجدول في Supabase</h3>
                 </div>
                 <button onclick="closeSqlModal()" class="text-slate-400 hover:text-slate-600">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 mb-2">
-                قم بنسخ السكربت التالي ولصقه في **Supabase SQL Editor** لإنشاء الجدول وإعداد الصلاحيات والأدوار بنجاح:
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                قم بنسخ ولصق كود SQL التالي في لوحة تحكم Supabase SQL Editor لإنشاء جدول <code class="text-indigo-500 font-mono">exam_results</code>:
             </p>
 
-            <div class="relative my-2 flex-grow overflow-hidden flex flex-col">
-                <div class="flex justify-between items-center bg-slate-800 px-4 py-2 rounded-t-xl text-xs text-slate-400 font-mono">
-                    <span>schema.sql</span>
-                    <button onclick="copySqlScript()" id="copyBtn" class="text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
-                        <i class="fa-regular fa-copy"></i>
-                        <span>نسخ الكود</span>
-                    </button>
-                </div>
-                <pre class="bg-slate-950 text-slate-200 p-4 rounded-b-xl overflow-y-auto text-xs font-mono leading-relaxed flex-grow border border-slate-800" dir="ltr"><code id="sqlCodeBlock">-- =========================================================
--- Supabase Schema for English Placement Test Application
--- Copy and paste this directly into your Supabase SQL Editor
--- =========================================================
+            <div class="relative mb-4">
+                <pre class="bg-slate-900 text-slate-200 p-4 rounded-2xl text-[11px] font-mono overflow-x-auto custom-scrollbar" dir="ltr"><code>create table exam_results (
+  id uuid default gen_random_uuid() primary key,
+  student_name text not null,
+  student_email text,
+  total_score int not null,
+  max_score int not null,
+  percentage int not null,
+  cefr_level text not null,
+  skills_breakdown jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);</code></pre>
+                <button onclick="copySqlCode(this)" class="absolute top-3 left-3 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] rounded-lg font-bold transition">
+                    نسخ الكود
+                </button>
+            </div>
 
--- 1. Create table for storing test submissions
-CREATE TABLE IF NOT EXISTS public.test_results (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    student_name TEXT NOT NULL,
-    student_email TEXT,
-    cefr_level TEXT NOT NULL,
-    score INTEGER NOT NULL,
-    total_questions INTEGER NOT NULL DEFAULT 25,
-    percentage NUMERIC(5, 2) NOT NULL,
-    grammar_score INTEGER DEFAULT 0,
-    vocab_score INTEGER DEFAULT 0,
-    reading_score INTEGER DEFAULT 0,
-    listening_score INTEGER DEFAULT 0,
-    time_spent_seconds INTEGER DEFAULT 0,
-    category_breakdown JSONB
-);
-
--- 2. Enable Row Level Security (RLS)
-ALTER TABLE public.test_results ENABLE ROW LEVEL SECURITY;
-
--- 3. Drop existing policies if any
-DROP POLICY IF EXISTS "Allow public insert to test_results" ON public.test_results;
-DROP POLICY IF EXISTS "Allow public read access to test_results" ON public.test_results;
-DROP POLICY IF EXISTS "Allow public delete from test_results" ON public.test_results;
-DROP POLICY IF EXISTS "Allow public update to test_results" ON public.test_results;
-
--- 4. Create Security Policies for Full Access
-CREATE POLICY "Allow public insert to test_results"
-    ON public.test_results
-    FOR INSERT 
-    WITH CHECK (true);
-
-CREATE POLICY "Allow public read access to test_results"
-    ON public.test_results
-    FOR SELECT 
-    USING (true);
-
-CREATE POLICY "Allow public delete from test_results"
-    ON public.test_results
-    FOR DELETE 
-    USING (true);
-
-CREATE POLICY "Allow public update to test_results"
-    ON public.test_results
-    FOR UPDATE 
-    USING (true)
-    WITH CHECK (true);
-
--- 5. Create performance indexes
-CREATE INDEX IF NOT EXISTS idx_test_results_created ON public.test_results (created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_test_results_cefr ON public.test_results (cefr_level);
-CREATE INDEX IF NOT EXISTS idx_test_results_email ON public.test_results (student_email);</code></pre>
+            <div class="text-left">
+                <button onclick="closeSqlModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs">
+                    إغلاق
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Application JavaScript Logic -->
     <script>
-        // ==========================================
-        // 1. Exam Questions Data (CEFR A1-C1)
-        // ==========================================
-        const questionsData = [
-            // A1 Level (Questions 1-5)
+        let supabaseClient = null;
+        let isSupabaseConfigured = false;
+        
+        let currentStudent = { name: '', email: '' };
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let examTimerInterval = null;
+        let timeLeftSeconds = 20 * 60; // 20 minutes
+
+        let adminSubmissions = [];
+
+        // Full CEFR English Placement Question Bank (25 Questions across Grammar, Vocabulary, Reading, Listening)
+        const questionsList = [
+            // A1 / Beginner
             {
                 id: 1,
-                level: "A1",
-                category: "Grammar",
-                question: "She _____ a doctor at the local city hospital.",
-                options: ["is", "are", "be", "am"],
-                answer: 0
+                category: 'Grammar',
+                level: 'A1',
+                question: "Complete the sentence: 'She _____ a student at the university.'",
+                options: ["is", "are", "am", "be"],
+                correct: 0
             },
             {
                 id: 2,
-                level: "A1",
-                category: "Vocabulary",
-                question: "Which word means the opposite of 'Cold'?",
-                options: ["Big", "Hot", "Dark", "Tall"],
-                answer: 1
+                category: 'Vocabulary',
+                level: 'A1',
+                question: "What is the opposite of the word 'hot'?",
+                options: ["Warm", "Cold", "Big", "Fast"],
+                correct: 1
             },
             {
                 id: 3,
-                level: "A1",
-                category: "Grammar",
-                question: "They _____ play football on Sunday mornings.",
-                options: ["doesn't", "don't", "isn't", "not"],
-                answer: 1
+                category: 'Grammar',
+                level: 'A1',
+                question: "Choose the correct pronoun: '____ like playing football on weekends.'",
+                options: ["He", "She", "They", "It"],
+                correct: 2
             },
             {
                 id: 4,
-                level: "A1",
-                category: "Listening",
-                audioText: "Welcome to our class. Please open your books to page ten.",
-                question: "Where should the students open their books?",
-                options: ["Page 20", "Page 10", "Page 2", "Page 12"],
-                answer: 1
+                category: 'Reading',
+                level: 'A1',
+                readingText: "Read the short profile: 'My name is John. I am 25 years old and I live in London. I work as an accountant.'",
+                question: "Where does John live?",
+                options: ["Paris", "New York", "London", "Madrid"],
+                correct: 2
             },
             {
                 id: 5,
-                level: "A1",
-                category: "Vocabulary",
-                question: "I want to buy some bread from the _____.",
-                options: ["pharmacy", "bakery", "library", "airport"],
-                answer: 1
+                category: 'Grammar',
+                level: 'A1',
+                question: "Which sentence is correct?",
+                options: ["He has a red car.", "He have a red car.", "He having a red car.", "He is have a red car."],
+                correct: 0
             },
-
-            // A2 Level (Questions 6-10)
+            // A2 / Elementary
             {
                 id: 6,
-                level: "A2",
-                category: "Grammar",
-                question: "Yesterday, we _____ a very exciting movie at the cinema.",
-                options: ["watch", "watched", "have watched", "watching"],
-                answer: 1
+                category: 'Grammar',
+                level: 'A2',
+                question: "Complete the sentence: 'Yesterday, I ____ to the supermarket with my mother.'",
+                options: ["go", "gone", "went", "going"],
+                correct: 2
             },
             {
                 id: 7,
-                level: "A2",
-                category: "Reading",
-                readingText: "Sarah loves cooking. Last weekend, she prepared a traditional Italian pasta dinner for her family. Everyone enjoyed the fresh ingredients.",
-                question: "What did Sarah cook for her family last weekend?",
-                options: ["French pastries", "Italian pasta", "Mexican tacos", "Japanese sushi"],
-                answer: 1
+                category: 'Vocabulary',
+                level: 'A2',
+                question: "What do you call a person who brings food to your table in a restaurant?",
+                options: ["Chef", "Waiter", "Manager", "Driver"],
+                correct: 1
             },
             {
                 id: 8,
-                level: "A2",
-                category: "Grammar",
-                question: "This laptop is _____ than the one I bought last year.",
-                options: ["more cheap", "cheaper", "cheapest", "as cheap"],
-                answer: 1
+                category: 'Grammar',
+                level: 'A2',
+                question: "Choose the correct comparative form: 'This book is ____ than the previous one.'",
+                options: ["more good", "gooder", "better", "best"],
+                correct: 2
             },
             {
                 id: 9,
-                level: "A2",
-                category: "Vocabulary",
-                question: "Could you please _____ the light? It is very dark in here.",
-                options: ["turn on", "turn off", "get off", "look after"],
-                answer: 0
+                category: 'Listening',
+                level: 'A2',
+                isAudio: true,
+                audioTextToSpeech: "Hello, my flight to Rome departs at 4:30 PM from gate number 12.",
+                question: "According to the audio announcement, what time does the flight to Rome depart?",
+                options: ["3:30 PM", "4:30 PM", "5:30 PM", "4:15 PM"],
+                correct: 1
             },
             {
                 id: 10,
-                level: "A2",
-                category: "Listening",
-                audioText: "The train to London departs from platform four in five minutes.",
-                question: "Which platform does the train leave from?",
-                options: ["Platform 14", "Platform 4", "Platform 5", "Platform 40"],
-                answer: 1
+                category: 'Grammar',
+                level: 'A2',
+                question: "Fill in the blank: 'How ____ water do you drink every day?'",
+                options: ["many", "much", "few", "any"],
+                correct: 1
             },
-
-            // B1 Level (Questions 11-15)
+            // B1 / Intermediate
             {
                 id: 11,
-                level: "B1",
-                category: "Grammar",
-                question: "If I _____ enough money, I would travel around the world.",
-                options: ["have", "had", "would have", "will have"],
-                answer: 1
+                category: 'Grammar',
+                level: 'B1',
+                question: "Complete the sentence: 'If I had more free time, I ____ travel around the world.'",
+                options: ["will", "would", "can", "have"],
+                correct: 1
             },
             {
                 id: 12,
-                level: "B1",
-                category: "Grammar",
-                question: "He has been living in Dubai _____ three years.",
-                options: ["since", "for", "during", "from"],
-                answer: 1
+                category: 'Vocabulary',
+                level: 'B1',
+                question: "What is a synonym for the word 'achieve'?",
+                options: ["Fail", "Accomplish", "Destroy", "Ignore"],
+                correct: 1
             },
             {
                 id: 13,
-                level: "B1",
-                category: "Vocabulary",
-                question: "She decided to _____ her application because she found another job.",
-                options: ["withdraw", "postpone", "overcome", "accomplish"],
-                answer: 0
+                category: 'Grammar',
+                level: 'B1',
+                question: "Choose the correct present perfect form: 'I ____ in this company for five years.'",
+                options: ["work", "am working", "have worked", "worked"],
+                correct: 2
             },
             {
                 id: 14,
-                level: "B1",
-                category: "Reading",
-                readingText: "Remote work has become increasingly popular. While it provides flexibility and reduces commuting times, it can also lead to feelings of isolation among team members.",
-                question: "What is mentioned as a potential disadvantage of remote work?",
-                options: ["Longer commute times", "Feelings of isolation", "Lack of flexibility", "Lower productivity"],
-                answer: 1
+                category: 'Reading',
+                level: 'B1',
+                readingText: "Reading excerpt: 'Online shopping has become increasingly popular because customers can compare prices easily and have goods delivered directly to their doorstep without leaving home.'",
+                question: "Why has online shopping become popular according to the text?",
+                options: ["Because goods are always free", "Because customers can compare prices and get home delivery", "Because physical shops are closed permanently", "Because shopping malls are too small"],
+                correct: 1
             },
             {
                 id: 15,
-                level: "B1",
-                category: "Listening",
-                audioText: "Please note that the conference schedule has changed. The keynote speech will start at two PM instead of three PM.",
-                question: "What time will the keynote speech start?",
-                options: ["1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"],
-                answer: 1
+                category: 'Grammar',
+                level: 'B1',
+                question: "Select the correct passive voice sentence: 'They built this bridge in 1995.'",
+                options: ["This bridge is built in 1995.", "This bridge was built in 1995.", "This bridge has built in 1995.", "This bridge builds in 1995."],
+                correct: 1
             },
-
-            // B2 Level (Questions 16-20)
+            // B2 / Upper Intermediate
             {
                 id: 16,
-                level: "B2",
-                category: "Grammar",
-                question: "By the time we arrived at the venue, the concert _____ already.",
-                options: ["started", "has started", "had started", "was starting"],
-                answer: 2
+                category: 'Grammar',
+                level: 'B2',
+                question: "Choose the correct modal verb for deduction: 'She looks very tired. She ____ all night studying for her exams.'",
+                options: ["must have worked", "should work", "can work", "might working"],
+                correct: 0
             },
             {
                 id: 17,
-                level: "B2",
-                category: "Vocabulary",
-                question: "His arguments were so _____ that everyone voted in favor of the proposal.",
-                options: ["persuasive", "ambiguous", "superficial", "reluctant"],
-                answer: 0
+                category: 'Vocabulary',
+                level: 'B2',
+                question: "What does the idiom 'once in a blue moon' mean?",
+                options: ["Very frequently", "Very rarely", "During a full moon", "Always on time"],
+                correct: 1
             },
             {
                 id: 18,
-                level: "B2",
-                category: "Grammar",
-                question: "Hardly _____ entered the room when the lights went out.",
-                options: ["I had", "had I", "did I", "have I"],
-                answer: 1
+                category: 'Grammar',
+                level: 'B2',
+                question: "Complete with the correct relative pronoun: 'The scientist ____ discovery changed modern medicine was awarded a prize.'",
+                options: ["who", "whom", "whose", "which"],
+                correct: 2
             },
             {
                 id: 19,
-                level: "B2",
-                category: "Reading",
-                readingText: "Artificial intelligence is reshaping urban development. Smart traffic management systems now analyze real-time data to optimize signal timings, significantly alleviating congestion during rush hours.",
-                question: "How do smart traffic management systems reduce congestion?",
-                options: ["By building new highway lanes", "By adjusting traffic light timings dynamically", "By prohibiting personal vehicles", "By raising fuel prices"],
-                answer: 1
+                category: 'Listening',
+                level: 'B2',
+                isAudio: true,
+                audioTextToSpeech: "Despite initial setbacks in the quarterly financial report, the tech startup managed to secure venture capital funding exceeding five million dollars.",
+                question: "What financial milestone did the startup achieve despite setbacks?",
+                options: ["They declared bankruptcy", "They secured over five million dollars in venture capital", "They reduced employee salaries", "They merged with a competitor"],
+                correct: 1
             },
             {
                 id: 20,
-                level: "B2",
-                category: "Listening",
-                audioText: "Despite initial technical glitches, the product launch generated unprecedented revenue across global markets.",
-                question: "How was the financial outcome of the product launch?",
-                options: ["It resulted in major losses", "It generated unprecedented revenue", "It met modest expectations", "It failed completely"],
-                answer: 1
+                category: 'Grammar',
+                level: 'B2',
+                question: "Choose the correct sentence featuring inversion: 'Seldom ____ such dedication in a young athlete.'",
+                options: ["I have seen", "have I seen", "I saw", "did I saw"],
+                correct: 1
             },
-
-            // C1 Level (Questions 21-25)
+            // C1 / Advanced
             {
                 id: 21,
-                level: "C1",
-                category: "Grammar",
-                question: "Were the manager _____ the budget sooner, the project would not have been delayed.",
-                options: ["to approve", "approved", "to have approved", "approving"],
-                answer: 2
+                category: 'Grammar',
+                level: 'C1',
+                question: "Select the correct advanced conditional structure: 'Had I known about the traffic congestion, I ____ another route.'",
+                options: ["would take", "will take", "would have taken", "had taken"],
+                correct: 2
             },
             {
                 id: 22,
-                level: "C1",
-                category: "Vocabulary",
-                question: "The CEO gave an _____ speech that captivated the entire audience.",
-                options: ["eloquent", "obsolete", "inadvertent", "erroneous"],
-                answer: 0
+                category: 'Vocabulary',
+                level: 'C1',
+                question: "What is the exact meaning of the word 'ubiquitous'?",
+                options: ["Extremely rare", "Present everywhere", "Highly dangerous", "Very mysterious"],
+                correct: 1
             },
             {
                 id: 23,
-                level: "C1",
-                category: "Vocabulary",
-                question: "The findings of the research paper were _____ with existing scientific theories.",
-                options: ["incompatible", "quintessential", "indispensable", "unanimous"],
-                answer: 0
+                category: 'Grammar',
+                level: 'C1',
+                question: "Choose the appropriate subjunctive mood form: 'It is essential that every candidate ____ their proposal before Friday.'",
+                options: ["submits", "submit", "submitted", "will submit"],
+                correct: 1
             },
             {
                 id: 24,
-                level: "C1",
-                category: "Grammar",
-                question: "Not until the investigation concluded _____ disclose the confidential documents.",
-                options: ["the authority did", "did the authority", "the authority had", "will the authority"],
-                answer: 1
+                category: 'Reading',
+                level: 'C1',
+                readingText: "Reading excerpt: 'The juxtaposition of traditional architectural aesthetics with futuristic sustainable engineering presents a profound paradigm shift in urban development.'",
+                question: "What does the author highlight regarding urban development?",
+                options: ["The abandonment of ancient traditions", "The merging of traditional aesthetics with sustainable engineering", "The complete digitization of city streets", "The elimination of green spaces"],
+                correct: 1
             },
             {
                 id: 25,
-                level: "C1",
-                category: "Reading",
-                readingText: "The phenomenon of cognitive dissonance occurs when an individual holds contradictory beliefs simultaneously. To alleviate the resulting psychological discomfort, people often rationalise their behavior or disregard disconfirming evidence.",
-                question: "According to the text, how do individuals typically resolve cognitive dissonance?",
-                options: ["By seeking external therapy", "By rationalizing or ignoring contradictory evidence", "By changing their habits instantly", "By avoiding social interaction"],
-                answer: 1
+                category: 'Grammar',
+                level: 'C1',
+                question: "Select the grammatically flawless sentence with advanced collocation:",
+                options: ["He mitigated the risks associated with the venture.", "He caused the risks associated with the venture.", "He ignored the risks associated with the venture.", "He heightened the risks associated with the venture."],
+                correct: 0
             }
         ];
 
-        // State variables
-        let currentQuestionIndex = 0;
-        let userAnswers = new Array(questionsData.length).fill(null);
-        let studentData = { name: '', email: '' };
-        let timerInterval = null;
-        let timeSpentSeconds = 0;
-        let supabaseClient = null;
-        let adminResultsCache = [];
-        let chartInstance = null;
+        window.onload = function() {
+            // Check saved theme
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
 
-        // Credentials
-        const ADMIN_USER = "admintest";
-        const ADMIN_PASS = "123456789";
-
-        // Initialize App
-        window.addEventListener('DOMContentLoaded', () => {
-            initSupabaseFromStorage();
-        });
-
-        // Supabase Initialization
-        function initSupabaseFromStorage() {
+            // Check saved Supabase config
             const savedUrl = localStorage.getItem('supabase_url');
             const savedKey = localStorage.getItem('supabase_key');
-
-            const badgeText = document.getElementById('supabaseStatusText');
-            const badge = document.getElementById('supabaseStatusBadge');
-
-            if (savedUrl && savedKey && window.supabase) {
-                try {
-                    supabaseClient = window.supabase.createClient(savedUrl, savedKey);
-                    badgeText.textContent = "متصل بـ Supabase";
-                    badge.className = "px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium transition flex items-center gap-1.5";
-                } catch (e) {
-                    console.error("Supabase init error:", e);
-                    setLocalStorageStatus();
-                }
-            } else {
-                setLocalStorageStatus();
+            if (savedUrl && savedKey) {
+                initSupabase(savedUrl, savedKey);
             }
-        }
+        };
 
-        function setLocalStorageStatus() {
-            supabaseClient = null;
-            const badgeText = document.getElementById('supabaseStatusText');
-            const badge = document.getElementById('supabaseStatusBadge');
-            badgeText.textContent = "التخزين المحلي (Offline)";
-            badge.className = "px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium transition flex items-center gap-1.5";
-        }
-
-        // Dark Mode Toggle
         function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-        }
-
-        // Start Test
-        function startTest(e) {
-            e.preventDefault();
-            const name = document.getElementById('studentName').value.trim();
-            const email = document.getElementById('studentEmail').value.trim();
-
-            if (!name) return;
-
-            studentData = { name, email };
-            currentQuestionIndex = 0;
-            userAnswers = new Array(questionsData.length).fill(null);
-            timeSpentSeconds = 0;
-
-            switchView('examView');
-            renderQuestion();
-            startTimer();
-        }
-
-        function startTimer() {
-            clearInterval(timerInterval);
-            let duration = 20 * 60; // 20 minutes
-            const timerDisplay = document.getElementById('timerText');
-
-            timerInterval = setInterval(() => {
-                timeSpentSeconds++;
-                let remaining = duration - timeSpentSeconds;
-                if (remaining <= 0) {
-                    clearInterval(timerInterval);
-                    finishTest();
-                    return;
-                }
-                let mins = Math.floor(remaining / 60);
-                let secs = remaining % 60;
-                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
-
-        // Render Current Question
-        function renderQuestion() {
-            const q = questionsData[currentQuestionIndex];
-
-            document.getElementById('currentQNum').textContent = currentQuestionIndex + 1;
-            document.getElementById('totalQNum').textContent = questionsData.length;
-            document.getElementById('categoryBadge').textContent = `${q.level} • ${q.category}`;
-            document.getElementById('questionText').textContent = q.question;
-
-            // Update Progress Bar
-            const progress = ((currentQuestionIndex + 1) / questionsData.length) * 100;
-            document.getElementById('progressBar').style.width = `${progress}%`;
-
-            // Handle Audio Prompt
-            const audioSec = document.getElementById('audioSection');
-            if (q.category === 'Listening' && q.audioText) {
-                audioSec.classList.remove('hidden');
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
             } else {
-                audioSec.classList.add('hidden');
-            }
-
-            // Handle Reading Section
-            const readingSec = document.getElementById('readingSection');
-            if (q.category === 'Reading' && q.readingText) {
-                readingSec.textContent = q.readingText;
-                readingSec.classList.remove('hidden');
-            } else {
-                readingSec.classList.add('hidden');
-            }
-
-            // Render Options
-            const container = document.getElementById('optionsContainer');
-            container.innerHTML = '';
-
-            q.options.forEach((opt, idx) => {
-                const isSelected = userAnswers[currentQuestionIndex] === idx;
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.onclick = () => selectOption(idx);
-                btn.className = `w-full text-left p-4 rounded-xl border font-medium text-sm transition flex items-center justify-between ${
-                    isSelected 
-                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-900 dark:text-indigo-200 shadow-sm' 
-                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
-                }`;
-
-                btn.innerHTML = `
-                    <span class="flex items-center gap-3">
-                        <span class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold ${
-                            isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 dark:border-slate-500 text-slate-500'
-                        }">${String.fromCharCode(65 + idx)}</span>
-                        <span>${opt}</span>
-                    </span>
-                    ${isSelected ? '<i class="fa-solid fa-circle-check text-indigo-600 dark:text-indigo-400 text-lg"></i>' : ''}
-                `;
-                container.appendChild(btn);
-            });
-
-            // Navigation Buttons
-            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
-            const nextBtn = document.getElementById('nextBtn');
-            if (currentQuestionIndex === questionsData.length - 1) {
-                nextBtn.textContent = 'إنهاء الاختبار وقدم النتيجة';
-                nextBtn.className = 'px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition shadow-md';
-            } else {
-                nextBtn.textContent = 'التالي';
-                nextBtn.className = 'px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm transition shadow-md';
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
             }
         }
 
-        function selectOption(index) {
-            userAnswers[currentQuestionIndex] = index;
-            renderQuestion();
-        }
-
-        function prevQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                renderQuestion();
+        function initSupabase(url, key) {
+            try {
+                supabaseClient = supabase.createClient(url, key);
+                isSupabaseConfigured = true;
+                document.getElementById('supabaseStatusBadge').className = "px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium transition flex items-center gap-1.5 hover:opacity-90";
+                document.getElementById('supabaseStatusText').innerText = "Supabase متصل";
+            } catch (err) {
+                console.error("Supabase init error:", err);
+                isSupabaseConfigured = false;
             }
         }
 
-        function nextQuestion() {
-            if (currentQuestionIndex < questionsData.length - 1) {
-                currentQuestionIndex++;
-                renderQuestion();
-            } else {
-                finishTest();
-            }
-        }
-
-        // Speech Synthesis for Listening Questions
-        function playAudioPrompt() {
-            const q = questionsData[currentQuestionIndex];
-            if (!q.audioText) return;
-
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(q.audioText);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.9;
-
-            const btnText = document.getElementById('audioBtnText');
-            btnText.textContent = "جاري التشغيل...";
-
-            utterance.onend = () => { btnText.textContent = "إعادة التشغيل"; };
-            utterance.onerror = () => { btnText.textContent = "إعادة التشغيل"; };
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // Finish & Calculate Results
-        async function finishTest() {
-            clearInterval(timerInterval);
-
-            let score = 0;
-            let breakdown = { Grammar: { correct: 0, total: 0 }, Vocabulary: { correct: 0, total: 0 }, Reading: { correct: 0, total: 0 }, Listening: { correct: 0, total: 0 } };
-
-            questionsData.forEach((q, idx) => {
-                if (!breakdown[q.category]) breakdown[q.category] = { correct: 0, total: 0 };
-                breakdown[q.category].total++;
-
-                if (userAnswers[idx] === q.answer) {
-                    score++;
-                    breakdown[q.category].correct++;
-                }
-            });
-
-            const percentage = Math.round((score / questionsData.length) * 100);
-            const cefr = calculateCEFRLevel(score, percentage);
-
-            // Render Results Screen
-            document.getElementById('resultCefrBadge').textContent = `${cefr.level} - ${cefr.title}`;
-            document.getElementById('resultCefrDesc').textContent = cefr.description;
-            document.getElementById('resultScoreText').textContent = `${score}/${questionsData.length}`;
-            document.getElementById('resultPercentText').textContent = `${percentage}%`;
-            document.getElementById('recommendationText').textContent = cefr.recommendation;
-
-            renderSkillsChart(breakdown);
-            switchView('resultsView');
-
-            // Save Result to Supabase or Local Storage
-            const record = {
-                student_name: studentData.name,
-                student_email: studentData.email || null,
-                cefr_level: `${cefr.level} - ${cefr.title}`,
-                score: score,
-                total_questions: questionsData.length,
-                percentage: percentage,
-                grammar_score: breakdown.Grammar?.correct || 0,
-                vocab_score: breakdown.Vocabulary?.correct || 0,
-                reading_score: breakdown.Reading?.correct || 0,
-                listening_score: breakdown.Listening?.correct || 0,
-                time_spent_seconds: timeSpentSeconds,
-                category_breakdown: breakdown,
-                created_at: new Date().toISOString()
-            };
-
-            await saveTestResult(record);
-        }
-
-        function calculateCEFRLevel(score, percentage) {
-            if (percentage >= 88) {
-                return {
-                    level: "C1",
-                    title: "Advanced",
-                    description: "تستطيع فهم طيف واسع من النصوص الطويلة والمعقدة، والتعبير بعفوية وطلاقة دون الحاجة للبحث عن الكلمات.",
-                    recommendation: "تركز توصياتك على القراءة في المجلات الأكاديمية وصياغة مقالات متقدمة وتطوير الدقة اللغوية بالمحادثات الاحترافية."
-                };
-            } else if (percentage >= 72) {
-                return {
-                    level: "B2",
-                    title: "Upper Intermediate",
-                    description: "تستطيع فهم الأفكار الرئيسية للنصوص المعقدة والتفاعل بعفوية سلسة مع الناطقين بها.",
-                    recommendation: "يُنصح بزيادة حصيلتك من المصطلحات التخصصية والأفعال المركبة (Phrasal Verbs) وممارسة كتابة التقارير الرسمية."
-                };
-            } else if (percentage >= 52) {
-                return {
-                    level: "B1",
-                    title: "Intermediate",
-                    description: "تستطيع التعامل مع معظم المواقف اليومية واستيعاب النقاط الرئيسية في المواضيع الفكرية والعملية.",
-                    recommendation: "استمر في مشاهدة البرامج بدون ترجمة وتدرب على الأفكار المركبة وقواعد الأزمنة التامة."
-                };
-            } else if (percentage >= 32) {
-                return {
-                    level: "A2",
-                    title: "Elementary",
-                    description: "تستطيع فهم الجمل والتعابير المباشرة المتعلقة بالمجالات ذات الأهمية المباشرة (العائلة، التسوق، العمل).",
-                    recommendation: "قم بزيادة حصيلة المفردات اليومية ومراجعة قواعد الماضي البسيط والمستقبل."
-                };
-            } else {
-                return {
-                    level: "A1",
-                    title: "Beginner",
-                    description: "تستطيع فهم واستخدام التعابير اليومية البسيطة والعبارات الأساسية للغاية لتلبية الاحتياجات الأولية.",
-                    recommendation: "ابدأ بدراسة الأساسيات وقواعد الحاضر البسيط والمفردات التعريفية الأساسية."
-                };
-            }
-        }
-
-        // Render Skills Chart
-        function renderSkillsChart(breakdown) {
-            const ctx = document.getElementById('skillsChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-
-            const categories = Object.keys(breakdown);
-            const percentages = categories.map(cat => {
-                const b = breakdown[cat];
-                return b.total > 0 ? Math.round((b.correct / b.total) * 100) : 0;
-            });
-
-            chartInstance = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['القواعد', 'المفردات', 'القراءة', 'الاستماع'],
-                    datasets: [{
-                        label: 'نسبة الإتقان %',
-                        data: percentages,
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: 'rgba(99, 102, 241, 1)',
-                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 100,
-                            ticks: { display: false }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        // Save Result to Supabase or LocalStorage
-        async function saveTestResult(record) {
-            const saveNote = document.getElementById('saveStatusNote');
-
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('test_results')
-                        .insert([record]);
-
-                    if (error) throw error;
-
-                    saveNote.innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-500"></i><span>تم حفظ نتيجتك بنجاح في قاعدة بيانات Supabase.</span>';
-                    saveNote.className = "text-xs p-3 rounded-xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center gap-2 border border-emerald-200 dark:border-emerald-800";
-                } catch (err) {
-                    console.warn("Supabase Save Error, falling back to LocalStorage:", err);
-                    saveToLocalStorage(record);
-                    saveNote.innerHTML = '<i class="fa-solid fa-circle-info text-amber-500"></i><span>تم حفظ النتيجة محلياً (تعذر الاتصال بـ Supabase).</span>';
-                }
-            } else {
-                saveToLocalStorage(record);
-                saveNote.innerHTML = '<i class="fa-solid fa-hard-drive text-slate-500"></i><span>تم حفظ نتيجتك في التخزين المحلي للجهاز.</span>';
-            }
-        }
-
-        function saveToLocalStorage(record) {
-            let existing = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
-            existing.unshift({ ...record, id: crypto.randomUUID() });
-            localStorage.setItem('placement_test_results', JSON.stringify(existing));
-        }
-
-        // ==========================================
-        // Admin Dashboard Logic
-        // ==========================================
-        function openAdminModal() {
-            document.getElementById('adminLoginModal').classList.remove('hidden');
-            document.getElementById('loginErrorMsg').classList.add('hidden');
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminLoginModal').classList.add('hidden');
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const u = document.getElementById('adminUser').value.trim();
-            const p = document.getElementById('adminPass').value.trim();
-
-            if (u === ADMIN_USER && p === ADMIN_PASS) {
-                closeAdminModal();
-                switchView('adminView');
-                fetchAdminData();
-            } else {
-                document.getElementById('loginErrorMsg').classList.remove('hidden');
-            }
-        }
-
-        function closeAdminDashboard() {
-            resetToHome();
-        }
-
-        async function fetchAdminData() {
-            const tableBody = document.getElementById('adminTableBody');
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">جاري تحميل البيانات...</td></tr>';
-
-            let records = [];
-            let isSupabase = false;
-
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('test_results')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-
-                    if (error) throw error;
-                    records = data || [];
-                    isSupabase = true;
-                } catch (e) {
-                    console.warn("Could not load from Supabase, loading local storage:", e);
-                    records = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
-                }
-            } else {
-                records = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
-            }
-
-            adminResultsCache = records;
-            document.getElementById('adminStatSource').textContent = isSupabase ? "Supabase DB" : "التخزين المحلي";
-            renderAdminTable(records);
-            updateAdminStats(records);
-        }
-
-        function updateAdminStats(records) {
-            document.getElementById('adminStatTotal').textContent = records.length;
-
-            if (records.length === 0) {
-                document.getElementById('adminStatAvg').textContent = '0%';
-                document.getElementById('adminStatTopLevel').textContent = '-';
-                return;
-            }
-
-            const avg = Math.round(records.reduce((acc, r) => acc + (r.percentage || 0), 0) / records.length);
-            document.getElementById('adminStatAvg').textContent = `${avg}%`;
-
-            // Most frequent level
-            const levelCounts = {};
-            records.forEach(r => {
-                const code = (r.cefr_level || 'A1').substring(0, 2);
-                levelCounts[code] = (levelCounts[code] || 0) + 1;
-            });
-            let topLvl = Object.keys(levelCounts).reduce((a, b) => levelCounts[a] > levelCounts[b] ? a : b, '-');
-            document.getElementById('adminStatTopLevel').textContent = topLvl;
-        }
-
-        function renderAdminTable(records) {
-            const tableBody = document.getElementById('adminTableBody');
-            tableBody.innerHTML = '';
-
-            if (records.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">لا توجد نتائج مسجلة حتى الآن</td></tr>';
-                return;
-            }
-
-            records.forEach(r => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/30 transition";
-
-                const dateStr = new Date(r.created_at).toLocaleDateString('ar-EG', {
-                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
-
-                const cefrCode = (r.cefr_level || '').substring(0, 2);
-                let badgeColor = "bg-slate-100 text-slate-700";
-                if (cefrCode === 'C1') badgeColor = "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300";
-                if (cefrCode === 'B2') badgeColor = "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300";
-                if (cefrCode === 'B1') badgeColor = "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300";
-                if (cefrCode === 'A2') badgeColor = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300";
-
-                tr.innerHTML = `
-                    <td class="p-3.5 font-bold">
-                        <div>${escapeHtml(r.student_name)}</div>
-                        <div class="text-[10px] font-normal text-slate-400" dir="ltr">${escapeHtml(r.student_email || 'بدون بريد')}</div>
-                    </td>
-                    <td class="p-3.5">
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeColor}">
-                            ${escapeHtml(r.cefr_level || 'A1')}
-                        </span>
-                    </td>
-                    <td class="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">${r.score}/25</td>
-                    <td class="p-3.5 font-bold">${r.percentage}%</td>
-                    <td class="p-3.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        قواعد: ${r.grammar_score || 0} | مفردات: ${r.vocab_score || 0} | قراءة: ${r.reading_score || 0} | استماع: ${r.listening_score || 0}
-                    </td>
-                    <td class="p-3.5 text-[11px] text-slate-400">${dateStr}</td>
-                    <td class="p-3.5 text-center">
-                        <button onclick="deleteRecord('${r.id}')" class="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        function filterAdminResults() {
-            const query = document.getElementById('adminSearchInput').value.toLowerCase();
-            const level = document.getElementById('adminLevelFilter').value;
-
-            const filtered = adminResultsCache.filter(r => {
-                const matchesQuery = (r.student_name || '').toLowerCase().includes(query) || (r.student_email || '').toLowerCase().includes(query);
-                const matchesLevel = level === 'ALL' || (r.cefr_level || '').startsWith(level);
-                return matchesQuery && matchesLevel;
-            });
-
-            renderAdminTable(filtered);
-        }
-
-        async function deleteRecord(id) {
-            if (!id) return;
-
-            if (supabaseClient) {
-                try {
-                    await supabaseClient.from('test_results').delete().eq('id', id);
-                } catch (e) {
-                    console.error("Supabase Delete Error:", e);
-                }
-            }
-
-            // Delete from local cache
-            let local = JSON.parse(localStorage.getItem('placement_test_results') || '[]');
-            local = local.filter(x => x.id !== id);
-            localStorage.setItem('placement_test_results', JSON.stringify(local));
-
-            fetchAdminData();
-        }
-
-        function exportToCSV() {
-            if (adminResultsCache.length === 0) return;
-
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-            csvContent += "الاسم,البريد,المستوى,الدرجة,النسبة,القواعد,المفردات,القراءة,الاستماع,التاريخ\n";
-
-            adminResultsCache.forEach(r => {
-                csvContent += `"${r.student_name}","${r.student_email || ''}","${r.cefr_level}",${r.score},${r.percentage}%,${r.grammar_score},${r.vocab_score},${r.reading_score},${r.listening_score},"${r.created_at}"\n`;
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `English_Placement_Test_Results_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Modal triggers
         function openSupabaseConfigModal() {
             document.getElementById('cfgSupaUrl').value = localStorage.getItem('supabase_url') || '';
             document.getElementById('cfgSupaKey').value = localStorage.getItem('supabase_key') || '';
@@ -1330,67 +783,478 @@ CREATE INDEX IF NOT EXISTS idx_test_results_email ON public.test_results (studen
             e.preventDefault();
             const url = document.getElementById('cfgSupaUrl').value.trim();
             const key = document.getElementById('cfgSupaKey').value.trim();
-
             if (url && key) {
                 localStorage.setItem('supabase_url', url);
                 localStorage.setItem('supabase_key', key);
+                initSupabase(url, key);
+                closeSupabaseConfigModal();
             }
-            closeSupabaseConfigModal();
-            initSupabaseFromStorage();
         }
 
         function useLocalStorageOnly() {
             localStorage.removeItem('supabase_url');
             localStorage.removeItem('supabase_key');
+            isSupabaseConfigured = false;
+            supabaseClient = null;
+            document.getElementById('supabaseStatusBadge').className = "px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 text-xs font-medium transition flex items-center gap-1.5 hover:opacity-90";
+            document.getElementById('supabaseStatusText').innerText = "وضع محلي (Local)";
             closeSupabaseConfigModal();
-            setLocalStorageStatus();
         }
 
-        function openSqlModal() {
-            document.getElementById('sqlModal').classList.remove('hidden');
+        function openSqlModal() { document.getElementById('sqlModal').classList.remove('hidden'); }
+        function closeSqlModal() { document.getElementById('sqlModal').classList.add('hidden'); }
+
+        function copySqlCode(btn) {
+            const codeText = btn.previousElementSibling.innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = codeText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            btn.innerText = "تم النسخ!";
+            setTimeout(() => btn.innerText = "نسخ الكود", 2000);
         }
 
-        function closeSqlModal() {
-            document.getElementById('sqlModal').classList.add('hidden');
+        function startTest(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const email = document.getElementById('studentEmail').value.trim();
+            if (!name) return;
+
+            currentStudent = { name, email };
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            timeLeftSeconds = 20 * 60;
+
+            document.getElementById('welcomeView').classList.add('hidden');
+            document.getElementById('examView').classList.remove('hidden');
+            document.getElementById('totalQNum').innerText = questionsList.length;
+
+            startTimer();
+            renderQuestion();
         }
 
-        function copySqlScript() {
-            const text = document.getElementById('sqlCodeBlock').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.getElementById('copyBtn');
-                btn.innerHTML = '<i class="fa-solid fa-check"></i><span>تم النسخ!</span>';
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fa-regular fa-copy"></i><span>نسخ الكود</span>';
-                }, 2000);
+        function startTimer() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                if (timeLeftSeconds <= 0) {
+                    clearInterval(examTimerInterval);
+                    finishExam();
+                    return;
+                }
+                timeLeftSeconds--;
+                const mins = Math.floor(timeLeftSeconds / 60);
+                const secs = timeLeftSeconds % 60;
+                document.getElementById('timerText').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function renderQuestion() {
+            const q = questionsList[currentQuestionIndex];
+            document.getElementById('currentQNum').innerText = currentQuestionIndex + 1;
+            document.getElementById('categoryBadge').innerText = `${q.category} • ${q.level}`;
+
+            // Progress bar
+            const progress = ((currentQuestionIndex) / questionsList.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            // Audio prompt handling
+            const audioSec = document.getElementById('audioSection');
+            if (q.isAudio) {
+                audioSec.classList.remove('hidden');
+            } else {
+                audioSec.classList.add('hidden');
+            }
+
+            // Reading text handling
+            const readingSec = document.getElementById('readingSection');
+            if (q.readingText) {
+                readingSec.classList.remove('hidden');
+                readingSec.innerText = q.readingText;
+            } else {
+                readingSec.classList.add('hidden');
+            }
+
+            document.getElementById('questionText').innerText = q.question;
+
+            // Options
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const isSelected = userAnswers[currentQuestionIndex] === idx;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `w-full text-right px-5 py-3.5 rounded-2xl border transition text-sm flex items-center justify-between ${
+                    isSelected 
+                        ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-900 dark:text-indigo-200 font-bold shadow-sm' 
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700/40 text-slate-800 dark:text-slate-200 hover:border-indigo-300'
+                }`;
+                btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border flex items-center justify-center text-xs ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 dark:border-slate-500'}">${isSelected ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}</span>`;
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
             });
+
+            // Prev / Next button state
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestionIndex === questionsList.length - 1) {
+                nextBtn.innerText = "إنهاء وتسليم الاختبار";
+                nextBtn.className = "px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-emerald-500/20";
+            } else {
+                nextBtn.innerText = "التالي";
+                nextBtn.className = "px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-indigo-500/20";
+            }
         }
 
-        // View Router Helper
-        function switchView(viewId) {
-            ['welcomeView', 'examView', 'resultsView', 'adminView'].forEach(id => {
-                const el = document.getElementById(id);
-                if (id === viewId) {
-                    el.classList.remove('hidden');
-                    el.classList.add('block');
-                } else {
-                    el.classList.add('hidden');
-                    el.classList.remove('block');
+        function selectOption(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questionsList.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                finishExam();
+            }
+        }
+
+        function playAudioPrompt() {
+            const q = questionsList[currentQuestionIndex];
+            if ('speechSynthesis' in window && q.audioTextToSpeech) {
+                const utterance = new SpeechSynthesisUtterance(q.audioTextToSpeech);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+                const btnText = document.getElementById('audioBtnText');
+                btnText.innerText = "جاري التشغيل...";
+                utterance.onend = () => { btnText.innerText = "تشغيل الصوت مرة أخرى"; };
+            }
+        }
+
+        async function finishExam() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+
+            // Calculate score
+            let score = 0;
+            let skillsStats = { Grammar: { correct: 0, total: 0 }, Vocabulary: { correct: 0, total: 0 }, Reading: { correct: 0, total: 0 }, Listening: { correct: 0, total: 0 } };
+
+            questionsList.forEach((q, idx) => {
+                const cat = q.category;
+                if (!skillsStats[cat]) skillsStats[cat] = { correct: 0, total: 0 };
+                skillsStats[cat].total++;
+
+                if (userAnswers[idx] === q.correct) {
+                    score++;
+                    skillsStats[cat].correct++;
+                }
+            });
+
+            const maxScore = questionsList.length;
+            const percentage = Math.round((score / maxScore) * 100);
+
+            // Determine CEFR level
+            let cefrLevel = "A1";
+            let cefrDesc = "مستوى مبتدئ: تستطيع فهم واستخدام التعبيرات المألوفة اليومية والجمل البسيطة.";
+            let recommendation = "يُنصح بالتركيز على قواعد تكوين الجمل الأساسية والمفردات اليومية الشائعة.";
+
+            if (percentage >= 88) {
+                cefrLevel = "C1 - Advanced";
+                cefrDesc = "مستوى متقدم: تفهم مجموعة واسعة من النصوص الطويلة والصعبة وتعبر بطلاقة وعفوية.";
+                recommendation = "أداؤك ممتاز جداً! يمكنك ممارسة المصطلحات الأكاديمية والمهنية الدقيقة.";
+            } else if (percentage >= 72) {
+                cefrLevel = "B2 - Upper Intermediate";
+                cefrDesc = "مستوى متوسط متقدم: تفهم الأفكار الرئيسية للنصوص المعقدة وتتفاعل بعفوية مع المتحدثين الأصليين.";
+                recommendation = "ننصحك بممارسة الاستماع للمقالات الصوتية المتقدمة وقراءة الأدبيات المتخصصة.";
+            } else if (percentage >= 52) {
+                cefrLevel = "B1 - Intermediate";
+                cefrDesc = "مستوى متوسط: تتعامل مع معظم المواقف المحتملة أثناء السفر وتستطيع وصف الخبرات والأحداث.";
+                recommendation = "ركز على تعزيز الأزمنة المركبة (مثل الماضى التام والمبني للمجهول) وتوسيع الحصيلة اللفظية.";
+            } else if (percentage >= 32) {
+                cefrLevel = "A2 - Elementary";
+                cefrDesc = "مستوى دون المتوسط: تفهم الجمل والتعبيرات المرتبطة بالمجالات القريبة جداً (المعلومات الشخصية والعائلية).";
+                recommendation = "عليك بتقوية بناء الجمل والمفردات الأساسية الخاصة بالحياة اليومية والعمل.";
+            }
+
+            // Update UI
+            document.getElementById('examView').classList.add('hidden');
+            document.getElementById('resultsView').classList.remove('hidden');
+
+            document.getElementById('resultCefrBadge').innerText = cefrLevel;
+            document.getElementById('resultCefrDesc').innerText = cefrDesc;
+            document.getElementById('resultScoreText').innerText = `${score}/${maxScore}`;
+            document.getElementById('resultPercentText').innerText = `${percentage}%`;
+            document.getElementById('recommendationText').innerText = recommendation;
+
+            // Render Skills Chart
+            renderSkillsChart(skillsStats);
+
+            // Save result to Supabase or LocalStorage
+            const submissionData = {
+                student_name: currentStudent.name,
+                student_email: currentStudent.email || 'غير متوفر',
+                total_score: score,
+                max_score: maxScore,
+                percentage: percentage,
+                cefr_level: cefrLevel,
+                skills_breakdown: skillsStats,
+                created_at: new Date().toISOString()
+            };
+
+            await saveSubmissionToDatabase(submissionData);
+        }
+
+        let skillsChartInstance = null;
+        function renderSkillsChart(stats) {
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            if (skillsChartInstance) skillsChartInstance.destroy();
+
+            const labels = Object.keys(stats);
+            const data = labels.map(l => stats[l].total > 0 ? Math.round((stats[l].correct / stats[l].total) * 100) : 0);
+
+            skillsChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'نسبة الإتقان للمهارة %',
+                        data: data,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: '#6366f1',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#4f46e5'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { stepSize: 25 }
+                        }
+                    }
                 }
             });
         }
 
-        function resetToHome() {
-            clearInterval(timerInterval);
-            switchView('welcomeView');
+        async function saveSubmissionToDatabase(data) {
+            const noteEl = document.getElementById('saveStatusNote');
+            if (isSupabaseConfigured && supabaseClient) {
+                try {
+                    const { error } = await supabaseClient.from('exam_results').insert([data]);
+                    if (error) throw error;
+                    noteEl.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500"></i><span>تم حفظ نتيجتك بنجاح في جدول Supabase.</span>`;
+                } catch (err) {
+                    console.error("Supabase insert error:", err);
+                    saveToLocalStorageOnly(data);
+                    noteEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i><span>تعذر الحفظ بـ Supabase، تم الحفظ محلياً (Local Storage).</span>`;
+                }
+            } else {
+                saveToLocalStorageOnly(data);
+                noteEl.innerHTML = `<i class="fa-solid fa-database text-indigo-500"></i><span>تم الحفظ في التخزين المحلي بنجاح (Local Mode).</span>`;
+            }
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+        function saveToLocalStorageOnly(data) {
+            let localList = JSON.parse(localStorage.getItem('local_exam_submissions') || '[]');
+            localList.unshift(data);
+            localStorage.setItem('local_exam_submissions', JSON.stringify(localList));
+        }
+
+        function resetToHome() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            document.getElementById('examView').classList.add('hidden');
+            document.getElementById('resultsView').classList.add('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('welcomeView').classList.remove('hidden');
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentEmail').value = '';
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+            document.getElementById('loginErrorMsg').classList.add('hidden');
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value.trim();
+
+            // Check against default credentials and the newly requested credentials
+            if ((u === 'admintest' && p === '123456789') || (u === 'test 6565' && p === '123456')) {
+                closeAdminModal();
+                openAdminDashboard();
+            } else {
+                document.getElementById('loginErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        async function openAdminDashboard() {
+            document.getElementById('welcomeView').classList.add('hidden');
+            document.getElementById('examView').classList.add('hidden');
+            document.getElementById('resultsView').classList.add('hidden');
+            document.getElementById('adminView').classList.remove('hidden');
+            await fetchAdminData();
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('welcomeView').classList.remove('hidden');
+        }
+
+        async function fetchAdminData() {
+            adminSubmissions = [];
+            const sourceEl = document.getElementById('adminStatSource');
+
+            if (isSupabaseConfigured && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('exam_results')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (error) throw error;
+                    adminSubmissions = data || [];
+                    sourceEl.innerText = "Supabase DB";
+                } catch (err) {
+                    console.error("Fetch Supabase error:", err);
+                    adminSubmissions = JSON.parse(localStorage.getItem('local_exam_submissions') || '[]');
+                    sourceEl.innerText = "Local Storage (Fallback)";
+                }
+            } else {
+                adminSubmissions = JSON.parse(localStorage.getItem('local_exam_submissions') || '[]');
+                sourceEl.innerText = "Local Storage Mode";
+            }
+
+            renderAdminTable(adminSubmissions);
+            updateAdminStats(adminSubmissions);
+        }
+
+        function updateAdminStats(list) {
+            const total = list.length;
+            document.getElementById('adminStatTotal').innerText = total;
+
+            if (total === 0) {
+                document.getElementById('adminStatAvg').innerText = "0%";
+                document.getElementById('adminStatTopLevel').innerText = "-";
+                return;
+            }
+
+            const avgPct = Math.round(list.reduce((acc, curr) => acc + curr.percentage, 0) / total);
+            document.getElementById('adminStatAvg').innerText = `${avgPct}%`;
+
+            // Find top level count
+            const counts = {};
+            list.forEach(item => {
+                const lvl = item.cefr_level ? item.cefr_level.split(' ')[0] : 'A1';
+                counts[lvl] = (counts[lvl] || 0) + 1;
+            });
+            let topLvl = '-';
+            let maxC = -1;
+            for (let lvl in counts) {
+                if (counts[lvl] > maxC) {
+                    maxC = counts[lvl];
+                    topLvl = lvl;
+                }
+            }
+            document.getElementById('adminStatTopLevel').innerText = topLvl;
+        }
+
+        function renderAdminTable(list) {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">لا توجد سجلات لطلاب متقدمين حتى الآن.</td></tr>`;
+                return;
+            }
+
+            list.forEach((item, index) => {
+                const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : 'حديث';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/30 transition";
+                
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-slate-900 dark:text-white">
+                        <div>${item.student_name}</div>
+                        <div class="text-[10px] text-slate-400 font-normal">${item.student_email || ''}</div>
+                    </td>
+                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">${item.cefr_level}</span></td>
+                    <td class="p-3.5 font-mono font-bold">${item.total_score} / ${item.max_score}</td>
+                    <td class="p-3.5 font-bold text-emerald-600 dark:text-emerald-400">${item.percentage}%</td>
+                    <td class="p-3.5 text-[11px] text-slate-500">
+                        ${item.skills_breakdown ? Object.keys(item.skills_breakdown).map(k => `${k}: ${item.skills_breakdown[k].correct}/${item.skills_breakdown[k].total}`).join(' | ') : 'غير متوفر'}
+                    </td>
+                    <td class="p-3.5 text-slate-400 text-[11px]">${dateStr}</td>
+                    <td class="p-3.5 text-center">
+                        <button onclick="deleteSubmission(${index})" class="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 transition" title="حذف النتيجة">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterAdminResults() {
+            const query = document.getElementById('adminSearchInput').value.toLowerCase();
+            const levelFilter = document.getElementById('adminLevelFilter').value;
+
+            const filtered = adminSubmissions.filter(item => {
+                const matchName = item.student_name.toLowerCase().includes(query) || (item.student_email && item.student_email.toLowerCase().includes(query));
+                const matchLevel = levelFilter === 'ALL' || (item.cefr_level && item.cefr_level.includes(levelFilter));
+                return matchName && matchLevel;
+            });
+
+            renderAdminTable(filtered);
+        }
+
+        async function deleteSubmission(index) {
+            const item = adminSubmissions[index];
+            if (isSupabaseConfigured && supabaseClient && item.id) {
+                try {
+                    await supabaseClient.from('exam_results').delete().eq('id', item.id);
+                } catch (err) {
+                    console.error("Delete error Supabase:", err);
+                }
+            }
+            
+            // Also remove from local fallback list
+            let localList = JSON.parse(localStorage.getItem('local_exam_submissions') || '[]');
+            localList.splice(index, 1);
+            localStorage.setItem('local_exam_submissions', JSON.stringify(localList));
+
+            fetchAdminData();
+        }
+
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "اسم الطالب,البريد الإلكتروني,المستوى,الدرجة الكلية,النسبة المئوية,التاريخ\n";
+            adminSubmissions.forEach(item => {
+                csvContent += `"${item.student_name}","${item.student_email || ''}","${item.cefr_level}",${item.total_score}/${item.max_score},${item.percentage}%,${item.created_at || ''}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "english_exam_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
