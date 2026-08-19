@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+html><!DOCTYPE html>
 <html lang="ar" dir="rtl" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -1258,4 +1258,5 @@
         }
     </script>
 </body>
-</html>
+</HTML>
+
